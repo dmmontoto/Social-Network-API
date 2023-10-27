@@ -32,6 +32,41 @@ module.exports = {
     }
   },
 
+  async updateThought(req, res) {
+    try {
+      const updatedThought = await Thought.findByIdAndUpdate(
+        req.params.thoughtId,
+        req.body,
+        { new: true }
+      );
+
+      if (!updatedThought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+
+      res.status(200).json(updatedThought);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+
+  async deleteThought(req, res) {
+    try {
+      const deletedThought = await Thought.findByIdAndRemove(req.params.thoughtId);
+
+      if (!deletedThought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+
+      // Remove associated reactions (bonus)
+      await Reaction.deleteMany({ _id: { $in: deletedThought.reactions } });
+
+      res.status(204).end();
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+
   async createReaction(req, res) {
     try {
       const thought = await Thought.findOneAndUpdate(
