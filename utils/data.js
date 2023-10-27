@@ -17,6 +17,12 @@ const users = [
       thoughts: [],
       friends: [],
     },
+    {
+        username: 'Tyler-Jack', 
+        email: 'TJ23@hotmail.com',
+        thoughts: [],
+        friends: [],
+      },
   ];
   
   const thoughts = [

@@ -1,41 +1,39 @@
-const connection = require('./connection'); 
-const { users, thoughts, reactions } = require('./data'); 
-const { User, Thought, Reaction } = require('../models'); 
+const connection = require('../config/connection');
+const { User, Thought } = require('../models');
+const Reaction = require('../models/Thought')
+const { users, thoughts, reactions } = require('./data');
 
-// Start the seeding runtime timer
-console.time('seeding');
+connection.on('error', (err) => {
+  console.error(err);
+  process.exit(1);
+});
 
-// Use the established connection for MongoDB
 connection.once('open', async () => {
-  try {
-    // Clear existing data
-    await User.deleteMany();
-    await Thought.deleteMany();
-    await Reaction.deleteMany();
+  console.log('Connected to the database');
 
-    // Seed users
-    const createdUsers = await User.insertMany(users);
+  // Use deleteMany to clear existing data
+  await User.deleteMany({});
+  await Thought.deleteMany({});
+  await Reaction.deleteMany({});
 
-    // Assign users to thoughts and reactions
-    const thoughtsWithUsers = thoughts.map((thought, index) => ({
-      ...thought,
-      username: createdUsers[index % createdUsers.length].username,
-    }));
+  // Seed users
+  await User.create(users);
 
-    const reactionsWithUsers = reactions.map((reaction, index) => ({
-      ...reaction,
-      username: createdUsers[index % createdUsers.length].username,
-    }));
+  // Assign users to thoughts and reactions
+  thoughts.forEach(async (thought) => {
+    const user = users.find((u) => u.username === thought.username);
+    thought.userId = user._id;
+    await Thought.create(thought);
+  });
 
-    // Seed thoughts and reactions
-    const createdThoughts = await Thought.insertMany(thoughtsWithUsers);
-    const createdReactions = await Reaction.insertMany(reactionsWithUsers);
+  reactions.forEach(async (reaction) => {
+    const user = users.find((u) => u.username === reaction.username);
+    const thought = thoughts[0]; 
+    reaction.userId = user._id;
+    reaction.thoughtId = thought._id;
+    await Reaction.create(reaction);
+  });
 
-    console.log('Database seeded successfully!');
-    console.timeEnd('seeding complete 🌱');
-    process.exit(0);
-  } catch (error) {
-    console.error('Error seeding the database:', error);
-    process.exit(1);
-  }
+  console.log('Database seeded successfully!');
+  process.exit(0);
 });
