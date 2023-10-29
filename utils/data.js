@@ -25,7 +25,7 @@ const users = [
       },
   ];
   
-  const thoughts = [
+const thoughts = [
     {
       thoughtText: 'This api is very interesting in my opinion',
       username: 'David-Montoto',
@@ -46,9 +46,9 @@ const users = [
       username: 'Jeffery-Smith',
       reactions: [],
     },
-  ];
+];
   
-  const reactions = [
+const reactions = [
     {
       reactionBody: 'Nice thought!',
       username: 'Michael-Davidson',

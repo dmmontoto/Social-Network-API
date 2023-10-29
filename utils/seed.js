@@ -1,6 +1,8 @@
 const connection = require('../config/connection');
-const { User, Thought } = require('../models');
-const Reaction = require('../models/Thought')
+const User = require('../models/User');
+const Thought = require('../models/Thought');
+const Reaction = require('../models/Thought'); 
+
 const { users, thoughts, reactions } = require('./data');
 
 connection.on('error', (err) => {
@@ -19,20 +21,11 @@ connection.once('open', async () => {
   // Seed users
   await User.create(users);
 
-  // Assign users to thoughts and reactions
-  thoughts.forEach(async (thought) => {
-    const user = users.find((u) => u.username === thought.username);
-    thought.userId = user._id;
-    await Thought.create(thought);
-  });
+  // Seed thoughts
+  await Thought.create(thoughts);
 
-  reactions.forEach(async (reaction) => {
-    const user = users.find((u) => u.username === reaction.username);
-    const thought = thoughts[0]; 
-    reaction.userId = user._id;
-    reaction.thoughtId = thought._id;
-    await Reaction.create(reaction);
-  });
+  // Seed reactions
+  await Reaction.create(reactions);
 
   console.log('Database seeded successfully!');
   process.exit(0);
