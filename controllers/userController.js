@@ -9,7 +9,7 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-
+ 
   async getSingleUser(req, res) {
     try {
       const user = await User.findById(req.params.id).populate('thoughts friends');
@@ -47,12 +47,14 @@ module.exports = {
 
   async deleteUser(req, res) {
     try {
+        const user =await User.findById(req.params.id);
+
       const deletedUser = await User.findByIdAndRemove(req.params.id);
       if (!deletedUser) {
         res.status(404).json({ message: 'User not found' });
         return;
       }
-      await Thought.deleteMany({ _id: { $in: deletedUser.thoughts } });
+      await Thought.deleteMany({ _id: { $in: user.thoughts } });
       res.status(204).end();
     } catch (err) {
       res.status(500).json(err);
